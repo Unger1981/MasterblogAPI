@@ -14,7 +14,21 @@ POSTS = [
 @app.route('/api/posts', methods=['GET','POST'])
 def get_and_post_posts():
     if request.method == 'GET':
-        return jsonify(POSTS)
+        if request.args.get('sort') == None:
+            return jsonify(POSTS)
+        else:
+            sort_query = request.args.get('sort').strip() 
+            direction_query = request.args.get('direction').strip()
+            print(type(direction_query))
+            print(sort_query)
+            if (sort_query == 'title' or sort_query =='content') and (direction_query == 'asc' or direction_query == 'desc'):
+                if direction_query == 'asc':
+                    sorted_post = sorted(POSTS, key=lambda x: x[sort_query]) 
+                elif direction_query == 'desc':
+                    sorted_post = sorted(POSTS, key=lambda x: x[sort_query], reverse=True)
+                return jsonify(sorted_post)  
+            else:
+                return jsonify({"message": ("No valid list direction or sort parameter (asc or desc) for direction and (title or content) for sort")}), 400                             
     elif request.method == 'POST':
         try:
             new_post = request.get_json()
